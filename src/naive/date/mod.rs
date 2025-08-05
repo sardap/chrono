@@ -1381,6 +1381,11 @@ impl NaiveDate {
         self.yof() >> 13
     }
 
+    /// Returns the day of week.
+    pub const fn const_year(&self) -> i32 {
+        self.year()
+    }
+
     /// Returns the day of year starting from 1.
     // This duplicates `Datelike::ordinal()`, because trait methods can't be const yet.
     #[inline]
@@ -1394,9 +1399,19 @@ impl NaiveDate {
         self.mdf().month()
     }
 
+    /// Returns the day of week.
+    pub const fn const_month(&self) -> u32 {
+        self.mdf().month()
+    }
+
     // This duplicates `Datelike::day()`, because trait methods can't be const yet.
     #[inline]
     const fn day(&self) -> u32 {
+        self.mdf().day()
+    }
+
+    /// Returns the day of week.
+    pub const fn const_day(&self) -> u32 {
         self.mdf().day()
     }
 
