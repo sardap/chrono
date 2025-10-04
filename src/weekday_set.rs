@@ -13,8 +13,7 @@ use crate::Weekday;
 /// Implemented as a bitmask where bits 1-7 correspond to Monday-Sunday.
 #[derive(Clone, Copy, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "bincode", derive(bincode::Encode, bincode::Decode))]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct WeekdaySet(#[cfg_attr(feature = "serde", serde(with = "weekday_serde"))] u8); // Invariant: the 8-th bit is always 0.
+pub struct WeekdaySet(u8); // Invariant: the 8-th bit is always 0.
 
 impl WeekdaySet {
     /// Create a `WeekdaySet` from an array of [`Weekday`]s.
@@ -336,24 +335,56 @@ impl Debug for WeekdaySet {
 #[cfg(feature = "serde")]
 pub mod weekday_serde {
     use super::WeekdaySet;
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    use core::fmt;
+    use serde::{de, ser};
 
-    pub fn serialize<S>(value: &WeekdaySet, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_u8(value.0 & 0x7F) // ensure top bit is 0
+    // Serialize the WeekdaySet as a number (0–127)
+    impl ser::Serialize for WeekdaySet {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: ser::Serializer,
+        {
+            serializer.serialize_u8(self.0 & 0x7F) // ensure top bit is 0
+        }
     }
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<WeekdaySet, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let v = u8::deserialize(deserializer)?;
-        if v & 0x80 != 0 {
-            return Err(serde::de::Error::custom("invalid weekday set: 8th bit must be 0"));
+    struct WeekdaySetVisitor;
+
+    impl<'de> de::Visitor<'de> for WeekdaySetVisitor {
+        type Value = WeekdaySet;
+
+        fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            f.write_str("WeekdaySet (u8 with top bit = 0)")
         }
-        Ok(WeekdaySet(v))
+
+        fn visit_u8<E>(self, value: u8) -> Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            if value & 0x80 != 0 {
+                return Err(E::custom("invalid weekday set: 8th bit must be 0"));
+            }
+            Ok(WeekdaySet(value))
+        }
+
+        fn visit_u64<E>(self, value: u64) -> Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            if value > 127 {
+                return Err(E::custom("invalid weekday set: value must be <= 127"));
+            }
+            Ok(WeekdaySet(value as u8))
+        }
+    }
+
+    impl<'de> de::Deserialize<'de> for WeekdaySet {
+        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: de::Deserializer<'de>,
+        {
+            deserializer.deserialize_u8(WeekdaySetVisitor)
+        }
     }
 }
 
