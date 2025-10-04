@@ -12,6 +12,7 @@ use crate::Weekday;
 ///
 /// Implemented as a bitmask where bits 1-7 correspond to Monday-Sunday.
 #[derive(Clone, Copy, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[cfg_attr(feature = "bincode", derive(bincode::Encode, bincode::Decode))]
 pub struct WeekdaySet(u8); // Invariant: the 8-th bit is always 0.
 
 impl WeekdaySet {

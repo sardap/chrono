@@ -38,6 +38,7 @@ use crate::OutOfRange;
 )]
 #[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
 #[cfg_attr(all(feature = "arbitrary", feature = "std"), derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "bincode", derive(bincode::Encode, bincode::Decode))]
 pub enum Weekday {
     /// Monday.
     Mon = 0,

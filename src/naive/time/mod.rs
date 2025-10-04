@@ -217,6 +217,7 @@ mod tests;
     archive_attr(derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash))
 )]
 #[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
+#[cfg_attr(feature = "bincode", derive(bincode::Encode, bincode::Decode))]
 pub struct NaiveTime {
     secs: u32,
     frac: u32,
