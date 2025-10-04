@@ -417,6 +417,30 @@ impl FromIterator<Weekday> for WeekdaySet {
     }
 }
 
+#[cfg(feature = "serde")]
+pub mod weekday_serde {
+    use super::WeekdaySet;
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    pub fn serialize<S>(value: &WeekdaySet, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_u8(value.0 & 0x7F) // ensure top bit is 0
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<WeekdaySet, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let v = u8::deserialize(deserializer)?;
+        if v & 0x80 != 0 {
+            return Err(serde::de::Error::custom("invalid weekday set: 8th bit must be 0"));
+        }
+        Ok(WeekdaySet(v))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::Weekday;
