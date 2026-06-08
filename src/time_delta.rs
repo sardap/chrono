@@ -325,6 +325,14 @@ impl TimeDelta {
         secs_part + nanos_part as i64
     }
 
+    /// Returns the fractional number of milliseconds in the `TimeDelta`.
+    pub fn as_milliseconds_f32(self) -> f32 {
+        let secs_as_ms = self.num_seconds() as f32 * MILLIS_PER_SEC as f32;
+
+        let nanos_as_ms = self.subsec_nanos() as f32 / NANOS_PER_MILLI as f32;
+        secs_as_ms + nanos_as_ms
+    }
+
     /// Returns the number of milliseconds in the fractional part of the duration.
     ///
     /// This is the number of milliseconds such that
