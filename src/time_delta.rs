@@ -342,6 +342,50 @@ impl TimeDelta {
         secs_part.checked_add(nanos_part as i64)
     }
 
+    /// Returns the total number of whole microseconds in the `TimeDelta`,
+    /// or `None` on overflow (exceeding 2^63 microseconds in either direction).
+    pub const fn num_microseconds_unchecked(&self) -> i64 {
+        match self.num_microseconds() {
+            Some(x) => x,
+            None => 0,
+        }
+    }
+
+    /// mul_f32 mul
+    pub const fn mul_f32(&self, val: f32) -> Self {
+        let secs = self.num_seconds() as f32;
+        let nanos = self.subsec_nanos() as f32;
+        let total_secs_f32 = secs + (nanos / 1_000_000_000.0);
+
+        let multiplied = total_secs_f32 * val;
+
+        if !multiplied.is_finite() {
+            panic!("Overflow when multiplying Duration by f32 (or value is NaN)");
+        }
+
+        let mut out_secs = multiplied as i64;
+        let mut out_nanos = ((multiplied - out_secs as f32) * 1_000_000_000.0) as i32;
+
+        if out_nanos < 0 {
+            out_secs = match out_secs.checked_sub(1) {
+                Some(s) => s,
+                None => panic!("Overflow when multiplying Duration by f32"),
+            };
+            out_nanos += 1_000_000_000;
+        } else if out_nanos >= 1_000_000_000 {
+            out_secs = match out_secs.checked_add(1) {
+                Some(s) => s,
+                None => panic!("Overflow when multiplying Duration by f32"),
+            };
+            out_nanos -= 1_000_000_000;
+        }
+
+        match Self::new(out_secs, out_nanos as u32) {
+            Some(d) => d,
+            None => panic!("Overflow when multiplying Duration by f32"),
+        }
+    }
+
     /// Returns the number of microseconds in the fractional part of the duration.
     ///
     /// This is the number of microseconds such that
