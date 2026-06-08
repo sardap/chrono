@@ -306,12 +306,12 @@ impl TimeDelta {
     }
 
     /// Returns the fractional number of seconds in the `TimeDelta`.
-    pub fn as_seconds_f64(self) -> f64 {
+    pub const fn as_seconds_f64(self) -> f64 {
         self.secs as f64 + self.nanos as f64 / NANOS_PER_SEC as f64
     }
 
     /// Returns the fractional number of seconds in the `TimeDelta`.
-    pub fn as_seconds_f32(self) -> f32 {
+    pub const fn as_seconds_f32(self) -> f32 {
         self.secs as f32 + self.nanos as f32 / NANOS_PER_SEC as f32
     }
 
@@ -326,7 +326,7 @@ impl TimeDelta {
     }
 
     /// Returns the fractional number of milliseconds in the `TimeDelta`.
-    pub fn as_milliseconds_f32(self) -> f32 {
+    pub const fn as_milliseconds_f32(self) -> f32 {
         let secs_as_ms = self.num_seconds() as f32 * MILLIS_PER_SEC as f32;
 
         let nanos_as_ms = self.subsec_nanos() as f32 / NANOS_PER_MILLI as f32;
