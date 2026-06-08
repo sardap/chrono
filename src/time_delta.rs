@@ -56,6 +56,7 @@ const SECS_PER_WEEK: i64 = 604_800;
     archive(compare(PartialEq, PartialOrd)),
     archive_attr(derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash))
 )]
+#[cfg_attr(feature = "bincode", derive(bincode::Encode, bincode::Decode))]
 #[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
 pub struct TimeDelta {
     secs: i64,
@@ -502,6 +503,8 @@ impl TimeDelta {
 
     /// The minimum possible `TimeDelta`: `-i64::MAX` milliseconds.
     pub const MIN: Self = MIN;
+    /// The minimum possible `TimeDelta`
+    pub const ZERO: Self = MIN;
 
     /// The maximum possible `TimeDelta`: `i64::MAX` milliseconds.
     pub const MAX: Self = MAX;
