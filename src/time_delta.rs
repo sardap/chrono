@@ -556,7 +556,7 @@ impl TimeDelta {
     /// The minimum possible `TimeDelta`: `-i64::MAX` milliseconds.
     pub const MIN: Self = MIN;
     /// The minimum possible `TimeDelta`
-    pub const ZERO: Self = MIN;
+    pub const ZERO: Self = Self::zero();
 
     /// The maximum possible `TimeDelta`: `i64::MAX` milliseconds.
     pub const MAX: Self = MAX;
